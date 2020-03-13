@@ -1,5 +1,6 @@
-# ProductBigDataAPITesting
-自动化API测试项目
+
+# 自动化API测试项目设计 
+ProductBigDataAPITesting  
 
 目录  
 - 1、生成测试用例  
