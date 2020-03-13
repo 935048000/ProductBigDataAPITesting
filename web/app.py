@@ -52,8 +52,8 @@ def addHostService():
         
         sql = """
                 INSERT INTO `apitesting`.`t_host`(`host`, `port`, `explain`, `state`)
-                VALUES ('http://49.235.241.182', '8080', 'API', '1');
-                """.format (request.form['startDate'], request.form['stopDate'])
+                VALUES ('{0}', '{1}', '{2}', '1');
+                """.format (request.form['host'], request.form['port'], request.form['explain'])
         # _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
         _logger.info (_rdata)
@@ -98,8 +98,8 @@ def addHostService():
         
         sql = """
                 INSERT INTO `apitesting`.`t_testcase`(`host_id`, `url`, `requests_data`, `result`)
-                VALUES ( 1, '/price/monCorrespondingPeriod', '{\'year\': \'2019\'}', NULL)
-                """.format (request.form['startDate'], request.form['stopDate'])
+                VALUES ( {0}, '{1}', '{2}', '{3}')
+                """.format (request.form['host_id'], request.form['url'], request.form['requests_data'], request.form['result'])
         # _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
         _logger.info (_rdata)
@@ -159,27 +159,33 @@ def addHostService():
     return returnData ("0", "成功", _rdata)
 
 
-@app.route ("/testing/addTestResult", methods=["POST"])
-def addHostService():
+def addHostService(test_code,test_username,testcase_id,testcase_result,testcase_recode,testcase_count):
     """
     写入测试结果
+    
+    :param test_code: 测试编码
+    :param test_username: 测试用户
+    :param testcase_id: 测试用例id
+    :param testcase_result: 测试结果
+    :param testcase_recode: 测试结果码
+    :param testcase_count: 测试次数
     :return:
     """
     try:
         
         sql = """
                 INSERT INTO `apitesting`.`t_test_log`(`test_code`, `test_username`, `testcase_id`, `testcase_result`, `testcase_recode`, `testcase_count`)
-                VALUES ('1', NULL, 1, 'test', '200', 1)
-                """.format (request.form['startDate'], request.form['stopDate'])
+                VALUES ('{0}', '{1}', {2}, '{3}', '{4}', {5})
+                """.format (test_code, test_username,testcase_id,testcase_result,testcase_recode,testcase_count)
         # _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
         _logger.info (_rdata)
     except Exception as e:
         _logger.error ("error: {}".format (e))
-        return returnData ("404", "失败", None)
-    return returnData ("0", "成功", _rdata)
+        return -1
+    return 0
 
-
+@app.route ("/testing/showTestResult", methods=["POST"])
 def executeTestCase():
     """
     执行测试用例
