@@ -4,7 +4,7 @@ from logging.handlers import TimedRotatingFileHandler
 import os
 
 path = os.path.split(os.path.realpath(__file__))[0]
-log_path = os.path.join(path, 'result')  # 存放log文件的路径
+log_path = os.path.join(path, 'logs')  # 存放log文件的路径
 
 
 class Logger(object):
@@ -14,7 +14,7 @@ class Logger(object):
         self.log_file_name = 'logs'  # 日志文件的名称
         self.backup_count = 5  # 最多存放日志的数量
         # 日志输出级别
-        self.console_output_level = 'WARNING'
+        self.console_output_level = 'INFO'
         self.file_output_level = 'DEBUG'
         # 日志输出格式
         self.formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

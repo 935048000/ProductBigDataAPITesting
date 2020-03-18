@@ -1,0 +1,8 @@
+# mysql的配置参数
+mysql:
+  user: "apitesting"
+  password: "learn_project"
+  port: 3306
+  host: "49.235.241.182"
+  db: "apitesting"
+  charset: "utf8"
