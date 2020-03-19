@@ -13,10 +13,12 @@ from utils.utils import returnData,getTestCode
 from utils.requestsTool import requestsTool
 import ast
 import pymysql
+from flask_cors import CORS
 
 config = load_config()
 mysql = mysql(config['mysql'])
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 _logger = logger
 # 模板
 # @app.route("/user", methods=['POST', 'GET'])
@@ -258,7 +260,7 @@ def exeTestCase():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, port=8089)
+    app.run(debug=False, port=8081,host='0.0.0.0')
     # pass
     # _requestsTool = requestsTool ()
     # data = ast.literal_eval ("{'year': '2019'}")

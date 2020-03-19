@@ -151,10 +151,13 @@ def returnData(errcode,errmsg,data):
     :return: JSON字符串
     """
     rdata = {"errcode":None,"errmsg":None,"data":None}
+    _data_data = {'data':None}
     rdata["errcode"] = errcode
     rdata["errmsg"] = errmsg
-    rdata["data"] = data
-    return str(rdata)
+    _data_data["data"] = data
+    rdata["data"] = _data_data
+    # logger.info(str(rdata))
+    return json.dumps(rdata),{"Content-Type":"application/json;charset=utf-8"}
 
 def getTestCode():
     """
