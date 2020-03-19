@@ -9,7 +9,7 @@ from flask import Flask, request, render_template, session, redirect, url_for
 from utils.Log import logger
 from utils.utils import mysql
 from utils.utils import load_config
-from utils.utils import returnData,getTestCode
+from utils.utils import returnData,getTestCode,get_url
 from utils.requestsTool import requestsTool
 import ast
 import pymysql
@@ -197,7 +197,12 @@ def exeTestCase():
     :return:
     """
     try:
-    
+        t_list = {'jsondata':{'list':[{'id':1},{'id':2}]}}
+        id_value = []
+        for i in t_list['jsondata']['list']:
+            id_value.append(i['id'])
+        _id = str(tuple(id_value))
+        print(_id)
         sql = """
                 SELECT
                 tc.id,h.host,h.port,tc.url,tc.requests_data,tc.result
@@ -206,8 +211,9 @@ def exeTestCase():
                 LEFT JOIN t_host h on h.id = tc.host_id
                 WHERE
                 h.state = 1
-                """
-        # _logger.info ("sql="+sql)
+                and tc.id in %s
+                """%(_id)
+        _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
         # _logger.info (_rdata[0])
         # _logger.info (type(_rdata[0]))
@@ -220,7 +226,7 @@ def exeTestCase():
             else:
                 data = ast.literal_eval (i['requests_data'])
 
-            url = i['host']+":"+i['port']+i['url']
+            url = get_url(i['host'],i['port'],i['url'])
 
             code,rdata = _requestsTool.send_post(url,data)
             
@@ -260,7 +266,8 @@ def exeTestCase():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, port=8081,host='0.0.0.0')
+    app.config['JSON_AS_ASCII'] = False
+    app.run(debug=False, port=8090,host='0.0.0.0')
     # pass
     # _requestsTool = requestsTool ()
     # data = ast.literal_eval ("{'year': '2019'}")

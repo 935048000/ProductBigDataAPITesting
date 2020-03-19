@@ -29,7 +29,7 @@ class requestsTool():
         if(self.result.status_code == 404):
             return self.result.status_code, self.result.text
         else:
-            return self.result.status_code, ast.literal_eval (self.result.text)
+            return self.result.status_code, self.result.text
         
 
     def send_get(self, url, data):

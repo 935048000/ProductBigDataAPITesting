@@ -157,7 +157,7 @@ def returnData(errcode,errmsg,data):
     _data_data["data"] = data
     rdata["data"] = _data_data
     # logger.info(str(rdata))
-    return json.dumps(rdata),{"Content-Type":"application/json;charset=utf-8"}
+    return json.dumps(rdata,ensure_ascii=False),{"Content-Type":"application/json;charset=utf-8"}
 
 def getTestCode():
     """
@@ -166,7 +166,12 @@ def getTestCode():
     """
     return str(time.strftime('%Y%m%d%H%M%S', time.localtime(time.time())))+ str(time.time()).replace('.', '')[-4:]
 
-
+def get_url(host,port,url):
+    """
+    获取测试用例URL
+    :return:
+    """
+    return host+":"+port+url
 
 
 
