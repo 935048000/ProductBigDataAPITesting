@@ -197,12 +197,21 @@ def exeTestCase():
     :return:
     """
     try:
-        t_list = {'jsondata':{'list':[{'id':1},{'id':2}]}}
+        t_list = {'jsondata':{'list':[{'id':1}]}}
+        
+        # 批量执行判断，取出需要执行测试用例ID
         id_value = []
-        for i in t_list['jsondata']['list']:
-            id_value.append(i['id'])
-        _id = str(tuple(id_value))
-        print(_id)
+        if len(t_list['jsondata']['list']) > 2:
+            for i in t_list['jsondata']['list']:
+                id_value.append(i['id'])
+            _id = str(tuple(id_value))
+        else:
+            id_value.append(t_list['jsondata']['list'][0]['id'])
+            id_value.append (t_list['jsondata']['list'][0]['id'])
+            _id = str (tuple (id_value))
+        
+        _logger.info("测试用例ID："+_id)
+        
         sql = """
                 SELECT
                 tc.id,h.host,h.port,tc.url,tc.requests_data,tc.result
@@ -219,7 +228,7 @@ def exeTestCase():
         # _logger.info (type(_rdata[0]))
         _requestsTool = requestsTool ()
 
-        # 循环执行测试
+        # 循环执行测试用例
         for i in _rdata:
             if len(i['requests_data']) < 2:
                 data = ""
