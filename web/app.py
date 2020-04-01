@@ -68,6 +68,28 @@ def addHostService():
     return returnData ("0", "成功", _rdata)
 
 
+@app.route ("/testing/updateHostService", methods=["POST"])
+def updateHostService():
+    """
+    修改测试服务
+    :return:
+    """
+    try:
+        
+        sql = """
+                UPDATE t_host
+                SET `host` = "{1}",`port` = "{2}",`explain` = "{3}",state = "{4}"
+                WHERE
+                id = {0}
+                """.format (request.form['id'], request.form['host'], request.form['port'], request.form['explain'], request.form['state'])
+        _logger.info ("sql=" + sql)
+        _rdata = mysql.exe (sql)
+        _logger.info (_rdata)
+    except Exception as e:
+        _logger.error ("error: {}".format (e))
+        return returnData ("404", "失败", None)
+    return returnData ("0", "成功", _rdata)
+
 @app.route ("/testing/showAllHostService", methods=["POST"])
 def showAllHostService():
     """
@@ -81,8 +103,8 @@ def showAllHostService():
                 *
                 FROM
                 t_host
-                WHERE
-                state = 1
+                -- WHERE
+                -- state = 1
         """
         # _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
@@ -114,6 +136,29 @@ def addTestCase():
     return returnData ("0", "成功", _rdata)
 
 
+@app.route ("/testing/updateTestCase", methods=["POST"])
+def updateTestCase():
+    """
+    修改测试用例
+    :return:
+    """
+    try:
+        
+        sql = """
+                UPDATE t_testcase
+                SET host_id = {4},url = "{1}",result = "{3}",requests_data = "{2}"
+                WHERE
+                id = {0}
+                """.format (request.form['testcase_id'], request.form['url'],
+                            request.form.get ("requests_data", type=str, default=None), request.form['result'],request.form['host_id'])
+        _logger.info ("sql=" + sql)
+        _rdata = mysql.exe (sql)
+        _logger.info (_rdata)
+    except Exception as e:
+        _logger.error ("error: {}".format (e))
+        return returnData ("404", "失败", None)
+    return returnData ("0", "成功", _rdata)
+
 @app.route ("/testing/showTestCase", methods=["POST"])
 def showTestCase():
     """
@@ -124,7 +169,7 @@ def showTestCase():
         
         sql = """
                 SELECT
-                h.host,h.port,tc.url,tc.requests_data,tc.result
+                tc.id,h.id as host_id,h.host,h.port,tc.url,tc.requests_data,tc.result
                 FROM
                 t_testcase tc
                 LEFT JOIN t_host h on h.id = tc.host_id
@@ -150,7 +195,7 @@ def showTestResult():
         
         sql = """
                 SELECT
-                *
+                tl.id,tl.test_code,tl.test_username,tl.testcase_id,tl.testcase_result,tl.testcase_recode,tl.testcase_count,date_format(tl.create_at,"%Y-%m-%d %H:%i:%S") as create_at
                 FROM
                 t_test_log tl
                 LEFT JOIN t_testcase tc on tc.id = tl.testcase_id
@@ -163,6 +208,30 @@ def showTestResult():
         return returnData ("404", "失败", None)
     return returnData ("0", "成功", _rdata)
 
+
+@app.route ("/testing/showAppointTestResult", methods=["POST"])
+def showAppointTestResult():
+    """
+    查看测试结果
+    :return:
+    """
+    try:
+        
+        sql = """
+                SELECT
+                tl.id,tl.test_code,tl.test_username,tl.testcase_id,tl.testcase_result,tl.testcase_recode,tl.testcase_count,date_format(tl.create_at,"%Y-%m-%d %H:%i:%S") as create_at
+                FROM
+                t_test_log tl
+                LEFT JOIN t_testcase tc on tc.id = tl.testcase_id
+                where tl.create_at >= "{0}" and tl.create_at <= "{1}"
+                """.format (request.form['startDate'], request.form['stopDate'],)
+        _logger.info ("sql="+sql)
+        _rdata = mysql.fetchall_db (sql)
+        _logger.info (_rdata)
+    except Exception as e:
+        _logger.error ("error: {}".format (e))
+        return returnData ("404", "失败", None)
+    return returnData ("0", "成功", _rdata)
 
 def addHostService(test_code,test_username,testcase_id,testcase_result,testcase_recode,testcase_count):
     """
@@ -253,8 +322,32 @@ def exeTestCase():
     return returnData ("0", "成功", None)
 
 
-
-
+@app.route ("/login", methods=["POST"])
+def login():
+    """
+    用户登录
+    :return:
+    """
+    try:
+        
+        sql = """
+                SELECT
+                id,`name`,account
+                FROM
+                `user`
+                WHERE
+                account = '{0}'
+                AND `password` = '{1}'
+                """.format (request.form['account'], request.form['password'])
+        # _logger.info ("sql="+sql)
+        _rdata = mysql.fetchall_db (sql)
+        _logger.info (_rdata)
+        if (len(_rdata) <= 0 ):
+            return returnData ("404", "失败", None)
+    except Exception as e:
+        _logger.error ("error: {}".format (e))
+        return returnData ("404", "失败", None)
+    return returnData ("0", "成功", _rdata)
 
 
 
