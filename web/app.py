@@ -309,7 +309,7 @@ def exeTestCase():
             code,rdata = _requestsTool.send_post(url,data)
 
             # 写入数据库
-            addHostService(getTestCode(),"testname",i['id'],(str(rdata).replace("\"","\'").replace("'","\'")),code,1)
+            addHostService(getTestCode(),request.form['username'],i['id'],(str(rdata).replace("\"","\'").replace("'","\'")),code,1)
 
     except Exception as e:
         _logger.error ("error: {}".format (e))
@@ -327,6 +327,7 @@ def exeBatchTestCase():
     try:
         # return returnData ("0", "成功", None)
         _logger.info (request.get_data ().decode())
+        _logger.info (request.form.get("username", type=str, default="admin_test"))
         t_list = ast.literal_eval(request.get_data ().decode())
         
         print(t_list['jsondata']['list'])
@@ -374,7 +375,7 @@ def exeBatchTestCase():
             code, rdata = _requestsTool.send_post (url, data)
             
             # 写入数据库
-            addHostService (getTestCode (), "testname", i['id'], (str (rdata).replace ("\"", "\'").replace ("'", "\'")),
+            addHostService (getTestCode (), t_list['jsondata']['username'], i['id'], (str (rdata).replace ("\"", "\'").replace ("'", "\'")),
                             code, 1)
     
     except Exception as e:
