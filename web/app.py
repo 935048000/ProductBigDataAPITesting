@@ -266,22 +266,11 @@ def addHostService(test_code,test_username,testcase_id,testcase_result,testcase_
 @app.route ("/testing/exeTestCase", methods=["POST"])
 def exeTestCase():
     """
-    执行测试用例
+    单次执行测试用例
     :return:
     """
     try:
-        # t_list = {'jsondata':{'list':[{'id':1}]}}
-        
-        # 批量执行判断，取出需要执行测试用例ID
         id_value = []
-        # if len(t_list['jsondata']['list']) > 2:
-        #     for i in t_list['jsondata']['list']:
-        #         id_value.append(i['id'])
-        #     _id = str(tuple(id_value))
-        # else:
-        #     id_value.append(t_list['jsondata']['list'][0]['id'])
-        #     id_value.append (t_list['jsondata']['list'][0]['id'])
-        #     _id = str (tuple (id_value))
         
         if (request.form['id']):
             id_value.append (request.form['id'])
@@ -318,12 +307,7 @@ def exeTestCase():
             url = get_url(i['host'],i['port'],i['url'])
 
             code,rdata = _requestsTool.send_post(url,data)
-            
-            # print (url)
-            # print (i['requests_data'])
-            # print(code)
-            # print(rdata)
-            
+
             # 写入数据库
             addHostService(getTestCode(),"testname",i['id'],(str(rdata).replace("\"","\'").replace("'","\'")),code,1)
 
@@ -336,7 +320,7 @@ def exeTestCase():
 @app.route ("/testing/exeBatchTestCase", methods=["POST"])
 def exeBatchTestCase():
     """
-    执行测试用例
+    批量执行测试用例
     :return:
     """
 
@@ -388,11 +372,6 @@ def exeBatchTestCase():
             url = get_url (i['host'], i['port'], i['url'])
             
             code, rdata = _requestsTool.send_post (url, data)
-            
-            # print (url)
-            # print (i['requests_data'])
-            # print(code)
-            # print(rdata)
             
             # 写入数据库
             addHostService (getTestCode (), "testname", i['id'], (str (rdata).replace ("\"", "\'").replace ("'", "\'")),
