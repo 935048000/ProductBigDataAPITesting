@@ -4,7 +4,8 @@
 # @FileName: app.py
 # @Software: PyCharm
 # @E-Mail: chenhao886640@gmail.com
-
+import sys
+sys.path.append("..")
 from flask import Flask, request, render_template, session, redirect, url_for
 from utils.Log import logger
 from utils.utils import mysql
