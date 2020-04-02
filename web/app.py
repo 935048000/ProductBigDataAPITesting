@@ -199,6 +199,8 @@ def showTestResult():
                 FROM
                 t_test_log tl
                 LEFT JOIN t_testcase tc on tc.id = tl.testcase_id
+                order by
+                tl.create_at DESC
                 """
         # _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
@@ -224,6 +226,8 @@ def showAppointTestResult():
                 t_test_log tl
                 LEFT JOIN t_testcase tc on tc.id = tl.testcase_id
                 where tl.create_at >= "{0}" and tl.create_at <= "{1}"
+                order by
+                tl.create_at DESC
                 """.format (request.form['startDate'], request.form['stopDate'],)
         _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
@@ -266,18 +270,25 @@ def exeTestCase():
     :return:
     """
     try:
-        t_list = {'jsondata':{'list':[{'id':1}]}}
+        # t_list = {'jsondata':{'list':[{'id':1}]}}
         
         # 批量执行判断，取出需要执行测试用例ID
         id_value = []
-        if len(t_list['jsondata']['list']) > 2:
-            for i in t_list['jsondata']['list']:
-                id_value.append(i['id'])
-            _id = str(tuple(id_value))
-        else:
-            id_value.append(t_list['jsondata']['list'][0]['id'])
-            id_value.append (t_list['jsondata']['list'][0]['id'])
+        # if len(t_list['jsondata']['list']) > 2:
+        #     for i in t_list['jsondata']['list']:
+        #         id_value.append(i['id'])
+        #     _id = str(tuple(id_value))
+        # else:
+        #     id_value.append(t_list['jsondata']['list'][0]['id'])
+        #     id_value.append (t_list['jsondata']['list'][0]['id'])
+        #     _id = str (tuple (id_value))
+        
+        if (request.form['id']):
+            id_value.append (request.form['id'])
+            id_value.append (request.form['id'])
             _id = str (tuple (id_value))
+        else:
+            return returnData ("404", "失败", None)
         
         _logger.info("测试用例ID："+_id)
         
@@ -289,11 +300,11 @@ def exeTestCase():
                 LEFT JOIN t_host h on h.id = tc.host_id
                 WHERE
                 h.state = 1
-                and tc.id in %s
-                """%(_id)
-        _logger.info ("sql="+sql)
+                and tc.id = {0}
+                """.format(request.form['id'])
+        # _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
-        # _logger.info (_rdata[0])
+        _logger.info (_rdata[0])
         # _logger.info (type(_rdata[0]))
         _requestsTool = requestsTool ()
 
@@ -321,6 +332,76 @@ def exeTestCase():
         return returnData ("404", "失败", None)
     return returnData ("0", "成功", None)
 
+
+@app.route ("/testing/exeBatchTestCase", methods=["POST"])
+def exeBatchTestCase():
+    """
+    执行测试用例
+    :return:
+    """
+
+    try:
+        # return returnData ("0", "成功", None)
+        _logger.info (request.get_data ().decode())
+        t_list = ast.literal_eval(request.get_data ().decode())
+        
+        print(t_list['jsondata']['list'])
+        _logger.info ("批量执行长度=%d"%len(t_list['jsondata']['list']))
+        # 批量执行判断，取出需要执行测试用例ID
+        id_value = []
+        if len(t_list['jsondata']['list']) >= 2:
+            _logger.info ("执行多个测试用例")
+            for i in t_list['jsondata']['list']:
+                id_value.append(i['id'])
+            _id = str(tuple(id_value))
+        else:
+            _logger.info ("执行一个测试用例")
+            id_value.append(t_list['jsondata']['list'][0]['id'])
+            id_value.append (t_list['jsondata']['list'][0]['id'])
+            _id = str (tuple (id_value))
+        
+        _logger.info ("测试用例ID：" + _id)
+        
+        sql = """
+                SELECT
+                tc.id,h.host,h.port,tc.url,tc.requests_data,tc.result
+                FROM
+                t_testcase tc
+                LEFT JOIN t_host h on h.id = tc.host_id
+                WHERE
+                h.state = 1
+                and tc.id in %s
+                """%(_id)
+        # _logger.info ("sql="+sql)
+        _rdata = mysql.fetchall_db (sql)
+        # _logger.info (_rdata[0])
+        # _logger.info (type(_rdata[0]))
+        _requestsTool = requestsTool ()
+        
+        # 循环执行测试用例
+        for i in _rdata:
+            if len (i['requests_data']) < 2:
+                data = ""
+            else:
+                data = ast.literal_eval (i['requests_data'])
+            
+            url = get_url (i['host'], i['port'], i['url'])
+            
+            code, rdata = _requestsTool.send_post (url, data)
+            
+            # print (url)
+            # print (i['requests_data'])
+            # print(code)
+            # print(rdata)
+            
+            # 写入数据库
+            addHostService (getTestCode (), "testname", i['id'], (str (rdata).replace ("\"", "\'").replace ("'", "\'")),
+                            code, 1)
+    
+    except Exception as e:
+        _logger.error ("error: {}".format (e))
+        return returnData ("404", "失败", None)
+    return returnData ("0", "成功", None)
 
 @app.route ("/login", methods=["POST"])
 def login():
