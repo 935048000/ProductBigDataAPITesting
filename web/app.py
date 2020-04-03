@@ -270,17 +270,6 @@ def exeTestCase():
     :return:
     """
     try:
-        id_value = []
-        
-        if (request.form['id']):
-            id_value.append (request.form['id'])
-            id_value.append (request.form['id'])
-            _id = str (tuple (id_value))
-        else:
-            return returnData ("404", "失败", None)
-        
-        _logger.info("测试用例ID："+_id)
-        
         sql = """
                 SELECT
                 tc.id,h.host,h.port,tc.url,tc.requests_data,tc.result
@@ -291,25 +280,25 @@ def exeTestCase():
                 h.state = 1
                 and tc.id = {0}
                 """.format(request.form['id'])
-        # _logger.info ("sql="+sql)
+        _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
-        _logger.info (_rdata[0])
+        _logger.info ("测试用例列表："+str(_rdata[0]))
         # _logger.info (type(_rdata[0]))
         _requestsTool = requestsTool ()
 
         # 循环执行测试用例
-        for i in _rdata:
-            if len(i['requests_data']) < 2:
-                data = ""
-            else:
-                data = ast.literal_eval (i['requests_data'])
+        # for i in _rdata:
+        if len(_rdata[0]['requests_data']) < 2:
+            data = ""
+        else:
+            data = ast.literal_eval (_rdata[0]['requests_data'])
 
-            url = get_url(i['host'],i['port'],i['url'])
+        url = get_url(_rdata[0]['host'],_rdata[0]['port'],_rdata[0]['url'])
 
-            code,rdata = _requestsTool.send_post(url,data)
+        code,rdata = _requestsTool.send_post(url,data)
 
-            # 写入数据库
-            addHostService(getTestCode(),request.form['username'],i['id'],(str(rdata).replace("\"","\'").replace("'","\'")),code,1)
+        # 写入数据库
+        addHostService(getTestCode(),request.form['username'],_rdata[0]['id'],(str(rdata).replace("\"","\'").replace("'","\'")),code,1)
 
     except Exception as e:
         _logger.error ("error: {}".format (e))
@@ -362,7 +351,7 @@ def exeBatchTestCase():
         # _logger.info (_rdata[0])
         # _logger.info (type(_rdata[0]))
         _requestsTool = requestsTool ()
-        
+        testCode = getTestCode ()
         # 循环执行测试用例
         for i in _rdata:
             if len (i['requests_data']) < 2:
@@ -375,7 +364,7 @@ def exeBatchTestCase():
             code, rdata = _requestsTool.send_post (url, data)
             
             # 写入数据库
-            addHostService (getTestCode (), t_list['jsondata']['username'], i['id'], (str (rdata).replace ("\"", "\'").replace ("'", "\'")),
+            addHostService (testCode, t_list['jsondata']['username'], i['id'], (str (rdata).replace ("\"", "\'").replace ("'", "\'")),
                             code, 1)
     
     except Exception as e:
@@ -399,7 +388,7 @@ def login():
                 account = '{0}'
                 AND `password` = '{1}'
                 """.format (request.form['account'], request.form['password'])
-        # _logger.info ("sql="+sql)
+        _logger.info ("sql="+sql)
         _rdata = mysql.fetchall_db (sql)
         _logger.info (_rdata)
         if (len(_rdata) <= 0 ):
