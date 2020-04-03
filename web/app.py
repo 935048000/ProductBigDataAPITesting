@@ -98,7 +98,6 @@ def showAllHostService():
     :return:
     """
     try:
-        
         sql = """
                 SELECT
                 *
@@ -391,7 +390,6 @@ def login():
     :return:
     """
     try:
-        
         sql = """
                 SELECT
                 id,`name`,account
